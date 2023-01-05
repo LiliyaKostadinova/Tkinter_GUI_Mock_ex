@@ -8,25 +8,22 @@ import json
 
 
 def load_info(file_name):
-    """Load info from chosen JSON file and parse it to get data about the plot"""
-    json_f = open(file_name)
+    '''Load info from chosen JSON file and parse it to get data about the plot'''
+    with open(file_name) as json_f:
+        info = json.load(json_f)
+        plot_title = info['title']
+        plot_line_label = info['label']
+        y_data = info['data']['y']
+        line_color = info['color']
 
-    info = json.load(json_f)
-    plot_title = info['title']
-    plot_line_label = info['label']
-    y_data = info['data']['y']
-    line_color = info['color']
-
-    json_f.close()
     return json_f, info, plot_title, plot_line_label, y_data, line_color
 
 
 # Tkinter interface setup
 class Root(tk.Tk):
-    """Handle the initial window by using Tkinter for visualization"""
-
+    '''Handle the initial window by using Tkinter for visualization'''
     def __init__(self):
-        """Constructor"""
+        '''Constructor'''
         super().__init__()
         self.geometry('800x700')
         self.text_style = ttk.Style()
@@ -44,20 +41,20 @@ class Root(tk.Tk):
         self.combobox = None
 
     def browse_button(self):
-        """Create a button that calls a browse-file functionality on click"""
+        '''Create a button that calls a browse-file functionality on click'''
         self.text_style.configure('text_style.TButton', font=('Helvetica', 10))
         self.br_button = ttk.Button(self, text='Browse', style='text_style.TButton', command=self.open_file)
         self.br_button.pack(pady=(0, 50))
         return self.br_button
 
     def open_file(self):
-        """Handle file browsing, pass the file path by initiating an instance of PlotView class"""
+        '''Handle file browsing, pass the file path by initiating an instance of PlotView class'''
         self.file_name = filedialog.askopenfile(title='Search file')
         if self.file_name:
             self.draw_plot();
 
     def draw_plot(self):
-        """Handle embedding the matplotlib graph to the tkinter window"""
+        '''Handle embedding the matplotlib graph to the tkinter window'''
         # Get the parsed necessary data
         json_f, info, plot_title, plot_line_label, y_data, line_color = load_info(self.file_name.name)
 
@@ -72,12 +69,12 @@ class Root(tk.Tk):
         self.draw_toolbar()
 
     def draw_toolbar(self):
-        """Draw toolbar with matplotlib tools and a dropdown at the bottom of the window"""
+        '''Draw toolbar with matplotlib tools and a dropdown at the bottom of the window'''
         # Add a drop-down (combobox)
         self.combobox = ttk.Combobox(self, state='readonly',
                                      values=['upper left', 'upper right', 'lower left', 'lower right'])
-        self.combobox.bind("<<ComboboxSelected>>", self.change_legend_pos)
-        self.combobox.set('upper left')
+        self.combobox.bind('<<ComboboxSelected>>', self.change_legend_pos)
+        self.combobox.set(self.legend_pos)
         self.combobox.pack(side=tk.BOTTOM, pady=(0, 15))
 
         # Add a Toolbar to the matplotlib graph
@@ -89,13 +86,13 @@ class Root(tk.Tk):
         self.canvas.draw()
 
     def change_legend_pos(self, event):
-        """Change the position of the legend based on the chosen option in the dropdown menu (combobox)"""
+        '''Change the position of the legend based on the chosen option in the dropdown menu (combobox)'''
         self.legend_pos = self.combobox.get()
         plt.legend(loc=self.legend_pos)
         self.canvas.draw()
 
 
 if __name__ == '__main__':
-    """Run the program by starting the Tkinter interface"""
+    '''Run the program by starting the Tkinter interface'''
     root = Root()
     root.mainloop()
