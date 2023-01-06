@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 from tkinter import ttk
 from tkinter import filedialog
 import matplotlib.pyplot as plt
@@ -16,7 +17,8 @@ def load_info(file_name):
         y_data = info['data']['y']
         line_color = info['color']
 
-    return json_f, info, plot_title, plot_line_label, y_data, line_color
+    print(plot_title, plot_line_label, y_data, line_color)
+    return plot_title, plot_line_label, y_data, line_color
 
 
 # Tkinter interface setup
@@ -39,6 +41,7 @@ class Root(tk.Tk):
         self.legend_pos = 'upper left'
         self.canvas = None
         self.combobox = None
+        self.save_btn = None
 
     def browse_button(self):
         '''Create a button that calls a browse-file functionality on click'''
@@ -49,14 +52,17 @@ class Root(tk.Tk):
 
     def open_file(self):
         '''Handle file browsing, pass the file path by initiating an instance of PlotView class'''
-        self.file_name = filedialog.askopenfile(title='Search file')
+        self.file_name = filedialog.askopenfile(title='Open file', filetypes=[('JSON files', '*.json')])
+        if not self.file_name.name.endswith('.json'):
+            messagebox.showerror("Wrong file format", "You must select a .json file!")
+            self.file_name = ""
         if self.file_name:
             self.draw_plot();
 
     def draw_plot(self):
         '''Handle embedding the matplotlib graph to the tkinter window'''
         # Get the parsed necessary data
-        json_f, info, plot_title, plot_line_label, y_data, line_color = load_info(self.file_name.name)
+        plot_title, plot_line_label, y_data, line_color = load_info(self.file_name.name)
 
         # Draw the matplotlib graph
         figure, axis = plt.subplots()
@@ -75,7 +81,11 @@ class Root(tk.Tk):
                                      values=['upper left', 'upper right', 'lower left', 'lower right'])
         self.combobox.bind('<<ComboboxSelected>>', self.change_legend_pos)
         self.combobox.set(self.legend_pos)
-        self.combobox.pack(side=tk.BOTTOM, pady=(0, 15))
+        self.combobox.pack(side=tk.BOTTOM, pady=(0, 5))
+
+        # Add save-as-png button
+        self.save_btn = ttk.Button(self, text='Save as PNG', style='text_style.TButton', command=self.save_as_png)
+        self.save_btn.pack(side=tk.BOTTOM)
 
         # Add a Toolbar to the matplotlib graph
         mat_toolbar = NavigationToolbar2Tk(self.canvas, self, pack_toolbar=False)
@@ -84,6 +94,11 @@ class Root(tk.Tk):
         plt.legend(loc=self.legend_pos)
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         self.canvas.draw()
+
+    @staticmethod
+    def save_as_png():
+        plt.savefig('linear_plot_export.png')
+        messagebox.showinfo('Saved file', 'File saved as png to the root folder.')
 
     def change_legend_pos(self, event):
         '''Change the position of the legend based on the chosen option in the dropdown menu (combobox)'''
