@@ -54,8 +54,8 @@ class Root(tk.Tk):
         '''Handle file browsing, pass the file path by initiating an instance of PlotView class'''
         self.file_name = filedialog.askopenfile(title='Open file', filetypes=[('JSON files', '*.json')])
         if not self.file_name.name.endswith('.json'):
-            messagebox.showerror("Wrong file format", "You must select a .json file!")
-            self.file_name = ""
+            messagebox.showerror('Wrong file format', 'You must select a .json file!')
+            self.file_name = ''
         if self.file_name:
             self.draw_plot();
 
