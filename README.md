@@ -1,1 +1,1 @@
-# GNDV_Mock_ex
+# A simple exercise for creating graphs
